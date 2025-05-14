@@ -4,29 +4,34 @@ import CompareLineChart from '../../components/CpuAlgoComponent/CompareLineChart
 import LineChart from '../../components/CpuAlgoComponent/LineChart';
 
 const RoundRobin = () => {
-  const [processes, setProcesses] = useState([{ id: 1, burstTime: '', arrivalTime: '' }]);
+  const [burstTimes, setBurstTimes] = useState('');
+  const [arrivalTimes, setArrivalTimes] = useState('');
   const [quantum, setQuantum] = useState('');
   const [result, setResult] = useState(null);
   const [compareData, setCompareData] = useState(null);
 
-  const handleInputChange = (index, field, value) => {
-    const updated = [...processes];
-    updated[index][field] = value;
-    setProcesses(updated);
-  };
-
-  const addProcess = () => {
-    setProcesses([...processes, { id: processes.length + 1, burstTime: '', arrivalTime: '' }]);
-  };
-
-  const removeProcess = (index) => {
-    if (processes.length > 1) {
-      const updated = processes.filter((_, i) => i !== index);
-      setProcesses(updated.map((p, i) => ({ ...p, id: i + 1 })));
-    }
+  const parseInput = (input) => {
+    return input
+      .split(/[\s,]+/)
+      .map(str => str.trim())
+      .filter(Boolean)
+      .map(Number);
   };
 
   const handleSubmit = async () => {
+    const btArr = parseInput(burstTimes);
+    const atArr = parseInput(arrivalTimes);
+
+    if (btArr.length !== atArr.length) {
+      alert('Mismatch in number of burst and arrival times.');
+      return;
+    }
+
+    const processes = btArr.map((bt, idx) => ({
+      id: idx + 1,
+      burstTime: bt,
+      arrivalTime: atArr[idx],
+    }));
     try {
       const res = await fetch('http://localhost:5000/api/cpu', {
         method: 'POST',
@@ -50,6 +55,19 @@ const RoundRobin = () => {
   };
 
   const handleCompare = async () => {
+    const btArr = parseInput(burstTimes);
+    const atArr = parseInput(arrivalTimes);
+
+    if (btArr.length !== atArr.length) {
+      alert('Mismatch in number of burst and arrival times.');
+      return;
+    }
+
+    const processes = btArr.map((bt, idx) => ({
+      id: idx + 1,
+      burstTime: bt,
+      arrivalTime: atArr[idx],
+    }));
     try {
       const res = await fetch('http://localhost:5000/api/compare', {
         method: 'POST',
@@ -119,40 +137,32 @@ const RoundRobin = () => {
             />
           </div>
 
-          <div className="space-y-4 mb-6 max-h-[300px] overflow-auto">
-            {processes.map((proc, idx) => (
-              <div key={proc.id} className="grid grid-cols-6 gap-4 items-center">
-                <span className="font-medium text-sm text-gray-700 col-span-1">P{proc.id}</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={proc.burstTime}
-                  onChange={(e) => handleInputChange(idx, 'burstTime', e.target.value)}
-                  placeholder="Burst"
-                  className="col-span-2 px-3 py-2 border rounded-md text-sm"
-                />
-                <input
-                  type="number"
-                  min="0"
-                  value={proc.arrivalTime}
-                  onChange={(e) => handleInputChange(idx, 'arrivalTime', e.target.value)}
-                  placeholder="Arrival"
-                  className="col-span-2 px-3 py-2 border rounded-md text-sm"
-                />
-                {processes.length > 1 && (
-                  <button
-                    onClick={() => removeProcess(idx)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            ))}
+          {/* Textareas for inputs */}
+          <div className="grid gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Burst Times</label>
+              <textarea
+                value={burstTimes}
+                onChange={(e) => setBurstTimes(e.target.value)}
+                placeholder="E.g., 5 3 8 6"
+                className="w-full px-3 py-2 border rounded-md text-sm"
+                rows={2}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Arrival Times</label>
+              <textarea
+                value={arrivalTimes}
+                onChange={(e) => setArrivalTimes(e.target.value)}
+                placeholder="E.g., 0 1 2 3"
+                className="w-full px-3 py-2 border rounded-md text-sm"
+                rows={2}
+              />
+            </div>
           </div>
 
+
           <div className="flex flex-wrap gap-3 mb-6">
-            <button onClick={addProcess} className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">Add</button>
             <button onClick={handleSubmit} className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700">Calculate</button>
             <button onClick={handleCompare} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">Compare</button>
           </div>
@@ -160,7 +170,7 @@ const RoundRobin = () => {
           {result && (
             <div className="mt-6">
               <h2 className="text-lg font-semibold text-gray-700 mb-2">Results</h2>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto h-64">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>

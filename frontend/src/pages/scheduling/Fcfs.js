@@ -4,40 +4,41 @@ import CompareLineChart from '../../components/CpuAlgoComponent/CompareLineChart
 import LineChart from '../../components/CpuAlgoComponent/LineChart';
 
 const Fcfs = () => {
-  const [processes, setProcesses] = useState([{ id: 1, burstTime: '', arrivalTime: '' }]);
+  const [burstTimes, setBurstTimes] = useState('');
+  const [arrivalTimes, setArrivalTimes] = useState('');
   const [result, setResult] = useState(null);
   const [compareData, setCompareData] = useState(null);
 
-
-  const handleInputChange = (index, field, value) => {
-    const updated = [...processes];
-    updated[index][field] = value;
-    setProcesses(updated);
-  };
-
-  const addProcess = () => {
-    setProcesses([...processes, { id: processes.length + 1, burstTime: '', arrivalTime: '' }]);
-  };
-
-  const removeProcess = (index) => {
-    if (processes.length > 1) {
-      const updated = processes.filter((_, i) => i !== index);
-      setProcesses(updated.map((p, i) => ({ ...p, id: i + 1 })));
-    }
+  const parseInput = (input) => {
+    return input
+      .split(/[\s,]+/)
+      .map(str => str.trim())
+      .filter(Boolean)
+      .map(Number);
   };
 
   const handleSubmit = async () => {
+    const btArr = parseInput(burstTimes);
+    const atArr = parseInput(arrivalTimes);
+
+    if (btArr.length !== atArr.length) {
+      alert('Mismatch in number of burst and arrival times.');
+      return;
+    }
+
+    const processes = btArr.map((bt, idx) => ({
+      id: idx + 1,
+      burstTime: bt,
+      arrivalTime: atArr[idx],
+    }));
+
     try {
       const res = await fetch('http://localhost:5000/api/cpu', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           algorithm: 'FCFS',
-          processes: processes.map(p => ({
-            ...p,
-            burstTime: parseInt(p.burstTime),
-            arrivalTime: parseInt(p.arrivalTime),
-          })),
+          processes,
         }),
       });
       const data = await res.json();
@@ -49,6 +50,20 @@ const Fcfs = () => {
   };
 
   const handleCompare = async () => {
+    const btArr = parseInput(burstTimes);
+    const atArr = parseInput(arrivalTimes);
+
+    if (btArr.length !== atArr.length) {
+      alert('Mismatch in number of burst and arrival times.');
+      return;
+    }
+
+    const processes = btArr.map((bt, idx) => ({
+      id: idx + 1,
+      burstTime: bt,
+      arrivalTime: atArr[idx],
+    }));
+
     try {
       const res = await fetch('http://localhost:5000/api/compare', {
         method: 'POST',
@@ -98,7 +113,7 @@ const Fcfs = () => {
       },
     ],
   };
-  console.log(compareData); 
+
   return (
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -106,40 +121,31 @@ const Fcfs = () => {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">FCFS Scheduling</h1>
 
-          <div className="space-y-4 mb-6 max-h-[300px] overflow-auto">
-            {processes.map((proc, idx) => (
-              <div key={proc.id} className="grid grid-cols-6 gap-4 items-center">
-                <span className="font-medium text-sm text-gray-700 col-span-1">P{proc.id}</span>
-                <input
-                  type="number"
-                  min="1"
-                  value={proc.burstTime}
-                  onChange={(e) => handleInputChange(idx, 'burstTime', e.target.value)}
-                  placeholder="Burst"
-                  className="col-span-2 px-3 py-2 border rounded-md text-sm"
-                />
-                <input
-                  type="number"
-                  min="0"
-                  value={proc.arrivalTime}
-                  onChange={(e) => handleInputChange(idx, 'arrivalTime', e.target.value)}
-                  placeholder="Arrival"
-                  className="col-span-2 px-3 py-2 border rounded-md text-sm"
-                />
-                {processes.length > 1 && (
-                  <button
-                    onClick={() => removeProcess(idx)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-            ))}
+          {/* Textareas for inputs */}
+          <div className="grid gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Burst Times</label>
+              <textarea
+                value={burstTimes}
+                onChange={(e) => setBurstTimes(e.target.value)}
+                placeholder="E.g., 5 3 8 6"
+                className="w-full px-3 py-2 border rounded-md text-sm"
+                rows={2}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Arrival Times</label>
+              <textarea
+                value={arrivalTimes}
+                onChange={(e) => setArrivalTimes(e.target.value)}
+                placeholder="E.g., 0 1 2 3"
+                className="w-full px-3 py-2 border rounded-md text-sm"
+                rows={2}
+              />
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-3 mb-6">
-            <button onClick={addProcess} className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm hover:bg-indigo-700">Add</button>
             <button onClick={handleSubmit} className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700">Calculate</button>
             <button onClick={handleCompare} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">Compare</button>
           </div>
@@ -147,7 +153,7 @@ const Fcfs = () => {
           {result && (
             <div className="mt-6">
               <h2 className="text-lg font-semibold text-gray-700 mb-2">Results</h2>
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto h-64">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
@@ -172,6 +178,7 @@ const Fcfs = () => {
                 </table>
               </div>
 
+              {/* Gantt Chart */}
               <div className="mt-4">
                 <h3 className="text-sm font-semibold mb-1">Gantt Chart</h3>
                 <div className="flex items-center h-12 bg-gray-100 rounded overflow-hidden">
@@ -190,8 +197,10 @@ const Fcfs = () => {
                   ))}
                 </div>
               </div>
+
+              {/* Comparison Results */}
               {compareData && (
-                <div>
+                <div className="mt-6">
                   <h2 className="text-lg font-semibold text-gray-700 mb-2">Comparison Results</h2>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
@@ -213,18 +222,18 @@ const Fcfs = () => {
                       </tbody>
                     </table>
                   </div>
-                  {/* Turnaround Time Chart */}
-                  <div className="bg-white p-6 rounded-lg shadow">
+
+                  {/* Turnaround Time Line Chart */}
+                  <div className="bg-white p-6 rounded-lg shadow mt-4">
                     <LineChart
                       title="Process-wise Turnaround Time"
-                      processes={compareData.FCFS.result}  // FCFS Process data
-                      fcfsData={compareData.FCFS.result.map(proc => proc.turnaroundTime)}  // FCFS Turnaround Time
-                      rrData={compareData.RoundRobin.result.map(proc => proc.turnaroundTime)}  // Round Robin Turnaround Time
-                      sjfData={compareData.SJF.result.map(proc => proc.turnaroundTime)}  // SJF Turnaround Time
+                      processes={compareData.FCFS.result}
+                      fcfsData={compareData.FCFS.result.map(proc => proc.turnaroundTime)}
+                      rrData={compareData.RoundRobin.result.map(proc => proc.turnaroundTime)}
+                      sjfData={compareData.SJF.result.map(proc => proc.turnaroundTime)}
                     />
                   </div>
                 </div>
-
               )}
             </div>
           )}
@@ -235,20 +244,16 @@ const Fcfs = () => {
           {chartData && <BarChart data={chartData} />}
           {compareChartData && <CompareLineChart data={compareChartData} />}
           {compareData && (
-            <div className="mt-6">
-              {/* Waiting Time Chart */}
-              <div className="bg-white p-6 rounded-lg shadow mb-6">
-                <LineChart
-                  title="Process-wise Waiting Time"
-                  processes={compareData.FCFS.result}  // FCFS Process data
-                  fcfsData={compareData.FCFS.result.map(proc => proc.waitingTime)}  // FCFS Waiting Time
-                  rrData={compareData.RoundRobin.result.map(proc => proc.waitingTime)}  // Round Robin Waiting Time
-                  sjfData={compareData.SJF.result.map(proc => proc.waitingTime)}  // SJF Waiting Time
-                />
-              </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <LineChart
+                title="Process-wise Waiting Time"
+                processes={compareData.FCFS.result}
+                fcfsData={compareData.FCFS.result.map(proc => proc.waitingTime)}
+                rrData={compareData.RoundRobin.result.map(proc => proc.waitingTime)}
+                sjfData={compareData.SJF.result.map(proc => proc.waitingTime)}
+              />
             </div>
           )}
-
         </div>
       </div>
     </div>
