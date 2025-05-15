@@ -14,18 +14,19 @@ const Home = () => (
         >
           CPU Scheduling
         </Link>
+      
         <Link
           to="/memory"
           className="bg-purple-500 hover:bg-purple-600 text-white text-lg font-medium px-8 py-4 rounded-full shadow-md transition-all duration-300 hover:-translate-y-1"
         >
-          Memory Management
+          Page Replacement
         </Link>
-        <Link
+        {/* <Link
           to="/disk"
           className="bg-purple-500 hover:bg-purple-600 text-white text-lg font-medium px-8 py-4 rounded-full shadow-md transition-all duration-300 hover:-translate-y-1"
         >
           Disk Scheduling
-        </Link>
+        </Link> */}
       </div>
     </div>
   </div>

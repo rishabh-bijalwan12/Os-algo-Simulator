@@ -1,4 +1,3 @@
-// Backend server with all fixed algorithms
 const express = require('express');
 const cors = require('cors');
 
@@ -8,7 +7,7 @@ const port = 5000;
 app.use(cors());
 app.use(express.json());
 
-// ========================== CPU Scheduling ==========================
+//CPU Scheduling
 function fcfs(processes) {
     let time = 0;
     const result = [];
@@ -100,6 +99,9 @@ function roundRobin(processes, quantum) {
     const startTimeMap = {};
     const arrivalMap = {};
     const ganttChart = [];
+    // const totalTurnaroundTime = 0;
+    // const totalWaitingTime = 0;
+    // const initaialWaitingTime = [];
 
     processes.forEach(p => {
         burstLeft[p.id] = parseInt(p.burstTime);
@@ -127,6 +129,7 @@ function roundRobin(processes, quantum) {
         const execTime = Math.min(quantum, burstLeft[current.id]);
 
         if (startTimeMap[current.id] === undefined) {
+            // initaialWaitingTime[current.id] = time-current.arrivalTime;
             startTimeMap[current.id] = time;
         }
 
@@ -146,9 +149,10 @@ function roundRobin(processes, quantum) {
 
         if (burstLeft[current.id] > 0) {
             readyQueue.push(current);
-        } else {
+        } 
+        else {
             completed.add(current.id);
-            const turnaroundTime = time - arrivalMap[current.id];
+            const turnaroundTime = time - (arrivalMap[current.id]);
             const waitingTime = turnaroundTime - parseInt(current.burstTime);
             turnaroundTimeMap[current.id] = turnaroundTime;
             waitingTimeMap[current.id] = waitingTime;
@@ -162,8 +166,16 @@ function roundRobin(processes, quantum) {
         }
     }
 
-    const totalWaitingTime = Object.values(waitingTimeMap).reduce((a, b) => a + b, 0);
-    const totalTurnaroundTime = Object.values(turnaroundTimeMap).reduce((a, b) => a + b, 0);
+    let totalWaitingTime = 0;
+    let totalTurnaroundTime = 0;
+
+    for (const id in waitingTimeMap) {
+        totalWaitingTime += waitingTimeMap[id];
+    }
+
+    for (const id in turnaroundTimeMap) {
+        totalTurnaroundTime += turnaroundTimeMap[id];
+    }
 
     return {
         result,
@@ -209,7 +221,7 @@ app.post('/api/compare', (req, res) => {
     }
 
     const algorithms = ['FCFS', 'SJF', 'RoundRobin'];
-    const quantum = 2; // Default quantum for Round Robin
+    const quantum = req.body.quantum ? req.body.quantum : 2; // Default quantum for Round Robin
     const results = {};
 
     try {
@@ -224,15 +236,15 @@ app.post('/api/compare', (req, res) => {
     }
 });
 
-// ========================== Memory Management ==========================
+//Memory Management
 const fifo = (references, frames) => {
-    const memory = new Set();     // Represents the current pages in memory
-    const queue = [];             // FIFO queue of pages in memory
+    const memory = new Set();
+    const queue = [];
     const steps = [];
     let pageFaults = 0;
 
     for (let ref of references) {
-        ref = Number(ref); // Ensure the reference is a number
+        ref = Number(ref);
 
         const wasInMemory = memory.has(ref);
 
@@ -242,7 +254,8 @@ const fifo = (references, frames) => {
                 queue.push(ref);
                 pageFaults++;
             }
-        } else {
+        }
+        else {
             if (!wasInMemory) {
                 const oldest = queue.shift(); // Remove the oldest page
                 memory.delete(oldest);
@@ -255,7 +268,7 @@ const fifo = (references, frames) => {
         steps.push({
             reference: ref,
             pageFault: !wasInMemory,
-            memory: Array.from(queue), // maintain the FIFO order for UI
+            memory: Array.from(queue),
         });
     }
 
@@ -264,8 +277,8 @@ const fifo = (references, frames) => {
 
 
 const lru = (references, frames) => {
-    const memory = new Set();          // Active pages in memory
-    const recentIndexes = new Map();   // Page → Last used index
+    const memory = new Set();
+    const recentIndexes = new Map();
     const steps = [];
     let pageFaults = 0;
 
@@ -279,9 +292,10 @@ const lru = (references, frames) => {
                 pageFaults++;
             }
             recentIndexes.set(ref, i);
-        } else {
+        }
+        else {
             if (!wasInMemory) {
-                // Find the LRU page (least recently used)
+                // Find the LRU page 
                 let lruIndex = Infinity;
                 let lruPage = null;
                 for (const page of memory) {
@@ -303,7 +317,7 @@ const lru = (references, frames) => {
         steps.push({
             reference: ref,
             pageFault: !wasInMemory,
-            memory: Array.from(memory), // For visual/debugging clarity
+            memory: Array.from(memory),
         });
     }
 
@@ -312,37 +326,52 @@ const lru = (references, frames) => {
 
 
 const mru = (references, frames) => {
-  const memory = [];
-  const steps = [];
-  const recentUse = new Map();
-  let pageFaults = 0;
+    const memory = new Set();
+    const recentIndexes = new Map();
+    const steps = [];
+    let pageFaults = 0;
 
-  references.forEach((ref, i) => {
-    const wasInMemory = memory.includes(ref);
-    if (!wasInMemory) {
-      pageFaults++;
-      if (memory.length < frames) {
-        memory.push(ref); // Add the page if there's space in memory
-      } else {
-        // Find the most recently used page (MRU)
-        const mruPage = [...recentUse.entries()]
-          .filter(([p]) => memory.includes(Number(p)))
-          .sort((a, b) => b[1] - a[1])[0][0]; // Sort by most recent use (higher index)
-        memory.splice(memory.indexOf(Number(mruPage)), 1); // Remove MRU page from memory
-        memory.push(ref); // Add the new page
-      }
+    for (let i = 0; i < references.length; i++) {
+        const ref = Number(references[i]);
+        const wasInMemory = memory.has(ref);
+
+        if (memory.size < frames) {
+            if (!wasInMemory) {
+                memory.add(ref);
+                pageFaults++;
+            }
+            recentIndexes.set(ref, i);
+        }
+        else {
+            if (!wasInMemory) {
+                // Find the MRU page 
+                let lruIndex = -Infinity;
+                let lruPage = null;
+                for (const page of memory) {
+                    if (recentIndexes.get(page) > lruIndex) {
+                        lruIndex = recentIndexes.get(page);
+                        lruPage = page;
+                    }
+                }
+
+                memory.delete(lruPage);
+                recentIndexes.delete(lruPage);
+
+                memory.add(ref);
+                pageFaults++;
+            }
+            recentIndexes.set(ref, i);
+        }
+
+        steps.push({
+            reference: ref,
+            pageFault: !wasInMemory,
+            memory: Array.from(memory),
+        });
     }
-    recentUse.set(ref, i); // Update the most recent use time for the page
-    steps.push({
-      reference: ref,
-      pageFault: !wasInMemory,
-      memory: [...memory],
-    });
-  });
 
-  return { pageFaults, steps };
+    return { pageFaults, steps };
 };
-
 
 
 app.post('/api/memory', (req, res) => {
@@ -372,43 +401,32 @@ app.post('/api/memory', (req, res) => {
 });
 
 app.post('/api/comparememory', (req, res) => {
-  const { references, frames } = req.body;
+    const { references, frames } = req.body;
 
-  if (!Array.isArray(references) || typeof frames !== 'number') {
-    return res.status(400).json({ error: 'Invalid input' });
-  }
-
-  const fifoResult = fifo(references, frames);
-  const lruResult = lru(references, frames);
-  const mruResult = mru(references, frames);
-
-  const comparison = {
-    FIFO: {
-      pageFaults: fifoResult.pageFaults,
-    },
-    LRU: {
-      pageFaults: lruResult.pageFaults,
-    },
-    MRU: {
-      pageFaults: mruResult.pageFaults,
-    },
-  };
-
-  res.json(comparison);
-});
-
-// TODO: Add diskFcfs, diskSstf, diskScan, diskCscan
-app.post('/api/disk', (req, res) => {
-    const { algorithm, requests, head } = req.body;
-
-    if (!algorithm || !Array.isArray(requests) || typeof head !== 'number') {
+    if (!Array.isArray(references) || typeof frames !== 'number') {
         return res.status(400).json({ error: 'Invalid input' });
     }
 
-    return res.status(501).json({ error: 'Disk scheduling algorithms not implemented yet' });
+    const fifoResult = fifo(references, frames);
+    const lruResult = lru(references, frames);
+    const mruResult = mru(references, frames);
+
+    const comparison = {
+        FIFO: {
+            pageFaults: fifoResult.pageFaults,
+        },
+        LRU: {
+            pageFaults: lruResult.pageFaults,
+        },
+        MRU: {
+            pageFaults: mruResult.pageFaults,
+        },
+    };
+
+    res.json(comparison);
 });
 
 // ========================== Server ==========================
 app.listen(port, () => {
-    console.log(`✅ Backend server is running at http://localhost:${port}`);
+    console.log(`Backend server is running at http://localhost:${port}`);
 });

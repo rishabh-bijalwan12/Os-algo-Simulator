@@ -117,7 +117,7 @@ const Lru = () => {
             <button
               onClick={handleSubmit}
               disabled={!referenceString || !numFrames}
-              className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 ${
+              className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 mr-4 ${
                 referenceString && numFrames
                   ? 'bg-green-600 hover:bg-green-700 text-white focus:ring-green-500'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'

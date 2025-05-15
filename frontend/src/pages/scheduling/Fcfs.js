@@ -11,7 +11,7 @@ const Fcfs = () => {
 
   const parseInput = (input) => {
     return input
-      .split(/[\s,]+/)
+      .split(',')
       .map(str => str.trim())
       .filter(Boolean)
       .map(Number);
@@ -72,6 +72,7 @@ const Fcfs = () => {
       });
       const data = await res.json();
       setCompareData(data);
+      console.log('Comparison Data:', data);  
     } catch (error) {
       console.error('Error:', error);
       alert('Failed to compare algorithms.');
@@ -131,7 +132,7 @@ const Fcfs = () => {
                 placeholder="E.g., 5 3 8 6"
                 className="w-full px-3 py-2 border rounded-md text-sm"
                 rows={2}
-              />
+              />  
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Arrival Times</label>

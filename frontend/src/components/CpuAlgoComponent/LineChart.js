@@ -30,7 +30,7 @@ const LineChart = ({ title, processes, fcfsData, rrData, sjfData }) => {
       {
         label: 'FCFS',
         data: fcfsData,
-        borderColor: 'rgba(59, 130, 246, 1)', // Blue line for FCFS
+        borderColor: 'rgba(59, 130, 246, 1)',
         backgroundColor: 'rgba(59, 130, 246, 0.2)',
         fill: false,
         tension: 0.4,
@@ -39,7 +39,7 @@ const LineChart = ({ title, processes, fcfsData, rrData, sjfData }) => {
       {
         label: 'Round Robin',
         data: rrData,
-        borderColor: 'rgba(16, 185, 129, 1)', // Green line for Round Robin
+        borderColor: 'rgba(16, 185, 129, 1)',
         backgroundColor: 'rgba(16, 185, 129, 0.2)',
         fill: false,
         tension: 0.4,
@@ -48,7 +48,7 @@ const LineChart = ({ title, processes, fcfsData, rrData, sjfData }) => {
       {
         label: 'SJF',
         data: sjfData,
-        borderColor: 'rgba(255, 99, 132, 1)', // Red line for SJF
+        borderColor: 'rgba(255, 99, 132, 1)',
         backgroundColor: 'rgba(255, 99, 132, 0.2)',
         fill: false,
         tension: 0.4,
@@ -57,7 +57,7 @@ const LineChart = ({ title, processes, fcfsData, rrData, sjfData }) => {
     ],
   };
 
-  // Chart options
+
   const options = {
     responsive: true,
     maintainAspectRatio: false,

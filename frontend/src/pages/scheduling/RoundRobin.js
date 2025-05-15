@@ -170,7 +170,8 @@ const RoundRobin = () => {
           {result && (
             <div className="mt-6">
               <h2 className="text-lg font-semibold text-gray-700 mb-2">Results</h2>
-              <div className="overflow-x-auto h-64">
+              <div className="overflow-x-auto h-64
+              ">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-gray-200 text-gray-700">
                     <tr>
