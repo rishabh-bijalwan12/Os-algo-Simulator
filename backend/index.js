@@ -470,6 +470,12 @@ function firstFit(blockSizes, processSizes) {
                 blocks[j] = 0;
                 break;
             }
+            else{
+                allocation[i] = {
+                    blockIndex: -1,
+                    blockSize: processSizes[i]
+                };
+            }
         }
     }
     return { allocation, blocks };
