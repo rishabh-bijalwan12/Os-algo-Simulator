@@ -21,12 +21,13 @@ const Home = () => (
         >
           Page Replacement
         </Link>
-        {/* <Link
-          to="/disk"
-          className="bg-purple-500 hover:bg-purple-600 text-white text-lg font-medium px-8 py-4 rounded-full shadow-md transition-all duration-300 hover:-translate-y-1"
+
+        <Link
+          to="/memory/bestfirstfit"
+          className="bg-green-600 hover:bg-green-700 text-white text-lg font-medium px-8 py-4 rounded-full shadow-md transition-all duration-300 hover:-translate-y-1"
         >
-          Disk Scheduling
-        </Link> */}
+          Memory Allocation
+        </Link>
       </div>
     </div>
   </div>

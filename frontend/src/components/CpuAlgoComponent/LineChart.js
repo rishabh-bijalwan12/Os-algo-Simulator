@@ -11,7 +11,6 @@ import {
   Legend,
 } from 'chart.js';
 
-// Register necessary components for chart.js
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -23,9 +22,9 @@ ChartJS.register(
 );
 
 const LineChart = ({ title, processes, fcfsData, rrData, sjfData }) => {
-  // Define chart data
+
   const data = {
-    labels: processes?.map((proc) => `P${proc.id}`), // X-axis is Process IDs (P1, P2, ...)
+    labels: processes?.map((proc) => `P${proc.id}`), // X-axis is Process ID
     datasets: [
       {
         label: 'FCFS',

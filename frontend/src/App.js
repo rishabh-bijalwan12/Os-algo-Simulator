@@ -9,6 +9,7 @@ import MemoryManagement from './pages/pageReplacement/MemoryManagement';
 import Fifo from './pages/pageReplacement/Fifo';
 import Lru from './pages/pageReplacement/Lru';
 import Mru from './pages/pageReplacement/Mru';
+import BestFirstFit from './pages/MemoryAllocation/BestFirstFit';
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
       <Route path="/memory/fifo" element={<Fifo />} />
       <Route path="/memory/lru" element={<Lru />} />
       <Route path="/memory/mru" element={<Mru />} />
+      <Route path="/memory/bestfirstfit" element={<BestFirstFit />} />
 
     </Routes>
   );

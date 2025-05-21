@@ -236,7 +236,7 @@ app.post('/api/compare', (req, res) => {
     }
 });
 
-//Memory Management
+//Memory Management page replacement algorithms
 const fifo = (references, frames) => {
     const memory = new Set();
     const queue = [];
@@ -274,7 +274,6 @@ const fifo = (references, frames) => {
 
     return { pageFaults, steps };
 };
-
 
 const lru = (references, frames) => {
     const memory = new Set();
@@ -324,7 +323,6 @@ const lru = (references, frames) => {
     return { pageFaults, steps };
 };
 
-
 const mru = (references, frames) => {
     const memory = new Set();
     const recentIndexes = new Map();
@@ -372,7 +370,6 @@ const mru = (references, frames) => {
 
     return { pageFaults, steps };
 };
-
 
 app.post('/api/memory', (req, res) => {
     let { algorithm, references, frames } = req.body;
@@ -426,7 +423,78 @@ app.post('/api/comparememory', (req, res) => {
     res.json(comparison);
 });
 
-// ========================== Server ==========================
+//Memory Allocation Algorithms
+function bestFit(blockSizes, processSizes) {
+    const allocation = Array(processSizes.length).fill(null);
+    const blocks = [...blockSizes];
+
+    for (let i = 0; i < processSizes.length; i++) {
+        let bestIdx = -1;
+
+        for (let j = 0; j < blocks.length; j++) {
+            if (blocks[j] >= processSizes[i]) {
+                if (bestIdx === -1 || blocks[j] < blocks[bestIdx]) {
+                    bestIdx = j;
+                }
+            }
+        }
+
+        if (bestIdx !== -1) {
+            allocation[i] = {
+                blockIndex: bestIdx,
+                blockSize: processSizes[i]
+            };
+            blocks[bestIdx] = 0;
+        } 
+        else {
+            allocation[i] = {
+                blockIndex: -1,
+                blockSize:  processSizes[i]
+            };
+        }
+    }
+
+    return { allocation, blocks };
+}
+
+function firstFit(blockSizes, processSizes) {
+    const allocation = Array(processSizes.length).fill(-1);
+    const blocks = [...blockSizes];
+    for (let i = 0; i < processSizes.length; i++) {
+        for (let j = 0; j < blocks.length; j++) {
+            if (blocks[j] >= processSizes[i]) {
+                allocation[i] = {
+                    blockIndex: j,
+                    blockSize: processSizes[i]
+                };
+                blocks[j] = 0;
+                break;
+            }
+        }
+    }
+    return { allocation, blocks };
+}
+
+app.post('/api/memoryallocation', (req, res) => {
+    const { algorithm, blockSizes, processSizes } = req.body;
+    if (!algorithm || !Array.isArray(blockSizes) || !Array.isArray(processSizes)) {
+        return res.status(400).json({ error: 'Invalid input' });
+    }
+    let result;
+    switch (algorithm) {
+        case 'BestFit':
+            result = bestFit(blockSizes, processSizes);
+            break;
+        case 'FirstFit':
+            result = firstFit(blockSizes, processSizes);
+            break;
+        default:
+            return res.status(400).json({ error: 'Unsupported algorithm' });
+    }
+    res.json(result);
+});
+
+//Server
 app.listen(port, () => {
     console.log(`Backend server is running at http://localhost:${port}`);
 });
