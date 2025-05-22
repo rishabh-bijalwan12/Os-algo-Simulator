@@ -94,10 +94,10 @@ function roundRobin(processes, quantum) {
     let time = 0;
     const queue = [...processes].sort((a, b) => a.arrivalTime - b.arrivalTime);
     const burstLeft = {};
+    const arrivalMap = {};
     const waitingTimeMap = {};
     const turnaroundTimeMap = {};
     const startTimeMap = {};
-    const arrivalMap = {};
     const ganttChart = [];
     // const totalTurnaroundTime = 0;
     // const totalWaitingTime = 0;
@@ -458,9 +458,10 @@ function bestFit(blockSizes, processSizes) {
 }
 
 function firstFit(blockSizes, processSizes) {
-    const allocation = Array(processSizes.length).fill(-1);
+    const allocation = Array(processSizes.length).fill(-1,-1);
     const blocks = [...blockSizes];
     for (let i = 0; i < processSizes.length; i++) {
+        var t=0;
         for (let j = 0; j < blocks.length; j++) {
             if (blocks[j] >= processSizes[i]) {
                 allocation[i] = {
@@ -468,14 +469,15 @@ function firstFit(blockSizes, processSizes) {
                     blockSize: processSizes[i]
                 };
                 blocks[j] = 0;
+                t=1;
                 break;
             }
-            else{
-                allocation[i] = {
-                    blockIndex: -1,
-                    blockSize: processSizes[i]
-                };
-            }
+        }
+        if(t==0){
+            allocation[i] = {
+                blockIndex: -1,
+                blockSize: processSizes[i]
+            };
         }
     }
     return { allocation, blocks };

@@ -28,6 +28,7 @@ const BestFirstFit = () => {
       });
       const data = await res.json();
       setResult({ ...data, algorithm });
+      console.log(result);
     } catch (error) {
       alert('Failed to calculate.');
     }
@@ -108,8 +109,6 @@ const BestFirstFit = () => {
             </div>
           )}
         </div>
-        {/* Right Panel: (empty for now) */}
-        {/* <div className="bg-white p-6 rounded-lg shadow-md space-y-6"></div> */}
       </div>
     </div>
   );
