@@ -28,7 +28,6 @@ const BestFirstFit = () => {
       });
       const data = await res.json();
       setResult({ ...data, algorithm });
-      console.log(result);
     } catch (error) {
       alert('Failed to calculate.');
     }
@@ -36,10 +35,12 @@ const BestFirstFit = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-5xl mx-auto  gap-6">
-        {/* Left Panel: Inputs, Gantt Chart, and Results */}
+      <div className="max-w-5xl mx-auto gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h1 className="text-2xl font-bold text-gray-800 mb-4">Memory Allocation (Best Fit & First Fit)</h1>
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">
+            Memory Allocation (Best Fit, First Fit, Worst Fit, Next Fit)
+          </h1>
+
           <div className="grid gap-4 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Block Sizes</label>
@@ -62,31 +63,38 @@ const BestFirstFit = () => {
               />
             </div>
           </div>
+
+          {/* Algorithm Buttons */}
           <div className="flex flex-wrap gap-3 mb-6">
             <button onClick={() => handleSubmit('BestFit')} className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700">Best Fit</button>
             <button onClick={() => handleSubmit('FirstFit')} className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">First Fit</button>
+            <button onClick={() => handleSubmit('WorstFit')} className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700">Worst Fit</button>
+            <button onClick={() => handleSubmit('NextFit')} className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm hover:bg-purple-700">Next Fit</button>
           </div>
-          {result && (
-              <div className="mt-4">
-                <h3 className="text-sm font-semibold mb-1">Allocation Chart</h3>
-                <div className="flex items-center h-12 bg-gray-100 rounded overflow-hidden">
-                  {result.allocation.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex flex-col justify-center items-center border-r border-white text-xs"
-                      style={{
-                        width: `${(item.blockSize) * 30}px`,
-                        backgroundColor: `hsl(${item.blockIndex* 60}, 70%, 85%)`,
-                      }}
-                    >
-                      <span className="font-semibold">P{idx+1}</span>
-                      <span>Block{item.blockIndex==-1?" Not allocated":item.blockIndex+1}</span>
 
-                    </div>
-                  ))}
-                </div>
+          {/* Allocation Chart */}
+          {result && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-1">Allocation Chart</h3>
+              <div className="flex items-center h-12 bg-gray-100 rounded overflow-hidden">
+                {result.allocation.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col justify-center items-center border-r border-white text-xs"
+                    style={{
+                      width: `${item.blockSize * 0.5}px`,
+                      backgroundColor: item.blockIndex === -1 ? '#ccc' : `hsl(${item.blockIndex * 60}, 70%, 85%)`,
+                    }}
+                  >
+                    <span className="font-semibold">P{idx + 1}</span>
+                    <span>{item.blockIndex === -1 ? "Not Allocated" : `Block ${item.blockIndex + 1}`}</span>
+                  </div>
+                ))}
               </div>
+            </div>
           )}
+
+          {/* Results Table */}
           {result && (
             <div className="mt-6">
               <h2 className="text-lg font-semibold text-gray-700 mb-2">{result.algorithm} Results</h2>
@@ -98,14 +106,28 @@ const BestFirstFit = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {result.allocation.map((blockIdx, i) => (
+                  {result.allocation.map((block, i) => (
                     <tr key={i} className="border-t">
                       <td className="px-3 py-2">P{i + 1}</td>
-                      <td className="px-3 py-2">{blockIdx.blockIndex !== -1 ? `Block ${blockIdx.blockIndex + 1}` : 'Not Allocated'}</td>
+                      <td className="px-3 py-2">
+                        {block.blockIndex !== -1 ? `Block ${block.blockIndex + 1}` : 'Not Allocated'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Optional: Remaining Block Sizes */}
+          {result && (
+            <div className="mt-4">
+              <h3 className="text-sm font-semibold mb-1">Remaining Block Sizes</h3>
+              <ul className="list-disc pl-6 text-sm text-gray-700">
+                {result.blocks.map((size, idx) => (
+                  <li key={idx}>Block {idx + 1}: {size === 0 ? 'Used' : `${size} KB Remaining`}</li>
+                ))}
+              </ul>
             </div>
           )}
         </div>

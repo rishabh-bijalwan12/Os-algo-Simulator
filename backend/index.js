@@ -483,11 +483,79 @@ function firstFit(blockSizes, processSizes) {
     return { allocation, blocks };
 }
 
+function worstFit(blockSizes, processSizes) {
+    const allocation = Array(processSizes.length).fill(null);
+    const blocks = [...blockSizes];
+
+    for (let i = 0; i < processSizes.length; i++) {
+        let worstIdx = -1;
+
+        for (let j = 0; j < blocks.length; j++) {
+            if (blocks[j] >= processSizes[i]) {
+                if (worstIdx === -1 || blocks[j] > blocks[worstIdx]) {
+                    worstIdx = j;
+                }
+            }
+        }
+
+        if (worstIdx !== -1) {
+            allocation[i] = {
+                blockIndex: worstIdx,
+                blockSize: processSizes[i]
+            };
+            blocks[worstIdx] = 0;
+        } 
+        else {
+            allocation[i] = {
+                blockIndex: -1,
+                blockSize: processSizes[i]
+            };
+        }
+    }
+
+    return { allocation, blocks };
+}
+
+function nextFit(blockSizes, processSizes) {
+    const allocation = Array(processSizes.length).fill(null);
+    const blocks = [...blockSizes];
+    let lastAllocIdx = 0;
+
+    for (let i = 0; i < processSizes.length; i++) {
+        let allocated = false;
+        let j = lastAllocIdx;
+
+        for (let count = 0; count < blocks.length; count++) {
+            if (blocks[j] >= processSizes[i]) {
+                allocation[i] = {
+                    blockIndex: j,
+                    blockSize: processSizes[i]
+                };
+                blocks[j] = 0;
+                lastAllocIdx = (j + 1) % blocks.length;
+                allocated = true;
+                break;
+            }
+            j = (j + 1) % blocks.length;
+        }
+
+        if (!allocated) {
+            allocation[i] = {
+                blockIndex: -1,
+                blockSize: processSizes[i]
+            };
+        }
+    }
+
+    return { allocation, blocks };
+}
+
 app.post('/api/memoryallocation', (req, res) => {
     const { algorithm, blockSizes, processSizes } = req.body;
     if (!algorithm || !Array.isArray(blockSizes) || !Array.isArray(processSizes)) {
         return res.status(400).json({ error: 'Invalid input' });
     }
+
     let result;
     switch (algorithm) {
         case 'BestFit':
@@ -496,13 +564,21 @@ app.post('/api/memoryallocation', (req, res) => {
         case 'FirstFit':
             result = firstFit(blockSizes, processSizes);
             break;
+        case 'WorstFit':
+            result = worstFit(blockSizes, processSizes);
+            break;
+        case 'NextFit':
+            result = nextFit(blockSizes, processSizes);
+            break;
         default:
             return res.status(400).json({ error: 'Unsupported algorithm' });
     }
+
     res.json(result);
 });
 
+
 //Server
 app.listen(port, () => {
-    console.log(`Backend server is running at http://localhost:${port}`);
+    console.log(`Backend server is running at http://localhost:${port}  `);
 });
