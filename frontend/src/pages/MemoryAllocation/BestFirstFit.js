@@ -17,7 +17,7 @@ const BestFirstFit = () => {
       return;
     }
     try {
-      const res = await fetch('http://localhost:5000/api/memoryallocation', {
+      const res = await fetch('https://os-algo-simulator.onrender.com/api/memoryallocation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

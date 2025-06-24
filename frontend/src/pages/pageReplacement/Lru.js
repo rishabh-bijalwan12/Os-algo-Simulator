@@ -15,7 +15,7 @@ const Lru = () => {
     try {
       const references = referenceString.split(',').map((v) => parseInt(v.trim()));
 
-      const res = await fetch('http://localhost:5000/api/memory', {
+      const res = await fetch('https://os-algo-simulator.onrender.com/api/memory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -37,7 +37,7 @@ const Lru = () => {
     try {
       const references = referenceString.split(',').map((v) => parseInt(v.trim()));
 
-      const res = await fetch('http://localhost:5000/api/comparememory', {
+      const res = await fetch('https://os-algo-simulator.onrender.com/api/comparememory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

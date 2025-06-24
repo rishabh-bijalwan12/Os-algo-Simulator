@@ -33,7 +33,7 @@ const Sjf = () => {
     }));
 
     try {
-      const res = await fetch('http://localhost:5000/api/cpu', {
+      const res = await fetch('https://os-algo-simulator.onrender.com/api/cpu', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -69,7 +69,7 @@ const Sjf = () => {
     }));
 
     try {
-      const res = await fetch('http://localhost:5000/api/compare', {
+      const res = await fetch('https://os-algo-simulator.onrender.com/api/compare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ processes }),
